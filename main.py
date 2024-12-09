@@ -1,18 +1,21 @@
 # main.py
 import pygame
 from draw import draw_roads
-from roads import roads
-from vehicle import Vehicle, generate_vehicle
+# from roads import roads
+from vehicle import generate_vehicle
 import random
 
 # 初始化 Pygame
 pygame.init()
-screen = pygame.display.set_mode((800, 700))
+screen = pygame.display.set_mode((600, 600))
 
 # 初始化車輛
 
-vehicles = [v for v in (generate_vehicle(random.choice(roads)) for _ in range(5)) if v is not None]
-
+vehicles = []
+for i in range(5):
+    vehicle = generate_vehicle()
+    print(type(vehicle))
+    vehicles.append(vehicle)
 # 主程序
 def main():
     clock = pygame.time.Clock()
@@ -24,6 +27,7 @@ def main():
 
         # 繪製場景
         draw_roads(screen)
+        
         for vehicle in vehicles:
             # vehicle.move()
             vehicle.draw(screen)
