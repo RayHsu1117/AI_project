@@ -50,7 +50,6 @@ def generate_vehicle():
     try:
         start_point,start_road = generate_random()
         destination_point,destination_road = generate_random()
-        print(f"Start point: {start_point}, destination point: {destination_point}")
         return Vehicle(start_point, destination_point,start_road,destination_road)
 
     except Exception as e:
@@ -60,10 +59,8 @@ def generate_vehicle():
 def generate_random():
     """生成隨機的點"""
     road = random.choice(list(roads.keys()))
-    print(f"Road: {road}")
     if(roads[road].direction == "LEFT" or roads[road].direction == "RIGHT"):
         point = (random.randint(roads[road].x1,roads[road].x2),random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
     else:    
         point = (random.randint(roads[road].x1,roads[road].x2-VEHICLE_SIZE),random.randint(roads[road].y1,roads[road].y2))
-    print(f"Generated point: {point}, road: {road}")
     return point,road

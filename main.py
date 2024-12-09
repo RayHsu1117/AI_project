@@ -14,7 +14,6 @@ screen = pygame.display.set_mode((600, 600))
 vehicles = []
 for i in range(5):
     vehicle = generate_vehicle()
-    print(type(vehicle))
     vehicles.append(vehicle)
 # 主程序
 def main():
