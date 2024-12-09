@@ -1,6 +1,6 @@
 # draw.py
 import pygame
-from roads import roads
+from roads import roads , intersections
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -31,3 +31,9 @@ def draw_roads(screen):
                 pygame.draw.rect(screen, YELLOW, (road["x_range"][0], separation[0], road["x_range"][1] - road["x_range"][0], separation[1] - separation[0]))
             elif road["type"] == "vertical":
                 pygame.draw.rect(screen, YELLOW, (separation[0], road["y_range"][0], separation[1] - separation[0], road["y_range"][1] - road["y_range"][0]))
+    for intersection in intersections:
+        pygame.draw.rect(screen, ROAD_COLOR, (intersection["area"][0],intersection["area"][2],30,30))
+        pygame.draw.rect(screen, BLACK, (intersection["area"][0],intersection["area"][2],3,3))
+        pygame.draw.rect(screen, BLACK, (intersection["area"][1]-3,intersection["area"][2],3,3))
+        pygame.draw.rect(screen, BLACK, (intersection["area"][0],intersection["area"][3]-3,3,3))
+        pygame.draw.rect(screen, BLACK, (intersection["area"][1]-3,intersection["area"][3]-3,3,3))
