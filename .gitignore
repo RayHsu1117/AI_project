@@ -7,7 +7,7 @@ __pycache__/
 env/
 
 # Poetry-specific files and directories
-.venv/               # Poetry's virtual environment (if created locally)
-poetry.lock          # Poetry's lock file (optional, include if you don't want to track it)
+.venv/
+poetry.lock
 pyproject.toml
 
