@@ -1,13 +1,35 @@
-# Byte-compiled files
+# Python cache files
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.whl
+
+# Poetry virtual environment
+.poetry/
+
+# MacOS system files
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+*.pyc
+*.pyo
+*.pyd
 
 # Virtual environments
-.venv/
+venv/
+.env/
 env/
 
-# Poetry-specific files and directories
-.venv/
+# Logs and databases
+*.log
+*.sqlite3
+
+# Unit test / coverage reports
+.coverage
+*.cover
+*.coverage.*
+
+# Poetry lock and virtualenv files
 poetry.lock
 pyproject.toml
-

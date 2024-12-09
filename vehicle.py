@@ -3,6 +3,7 @@ from collections import deque
 import pygame
 from start_end import generate_start, generate_end
 from roads import get_road_data
+import globals
 CAR_COLOR = (255, 0, 0)  # 紅色
 CAR_REACHED_COLOR = (255, 165, 0)  # 橘色
 
@@ -14,6 +15,7 @@ class Vehicle:
         self.road_type = road_type
         self.reached_destination = False  # 車輛是否到達終點
         self.current_road = road_name
+        self.speed = 300 / globals.fps  # 每秒 10 pixels，對應到每幀 (30 FPS) 的移動距離
 
     
 
@@ -27,10 +29,12 @@ class Vehicle:
 
     def move(self):
         """讓車輛沿路徑移動"""
-        if not self.reached_destination and self.path:
-            self.x, self.y = self.path.popleft()
-        if not self.path:  # 如果路徑空了，標記為到達終點
-            self.reached_destination = True
+        # if not self.reached_destination and self.path:
+        #     self.x, self.y = self.path.popleft()
+        # if not self.path:  # 如果路徑空了，標記為到達終點
+        #     self.reached_destination = True
+        self.y -= self.speed  # 向上移動
+
 
     def draw(self, screen):
         """繪製車輛"""
