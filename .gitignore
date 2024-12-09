@@ -1,0 +1,13 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+env/
+
+# Poetry-specific files and directories
+.venv/
+poetry.lock
+pyproject.toml
+
