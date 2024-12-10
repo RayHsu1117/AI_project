@@ -5,6 +5,7 @@ import pygame
 # from roads import roads
 from map import roads
 import random
+import globals
 
 VEHICLE_SIZE = 15
 CAR_COLOR = (255, 0, 0)  # 紅色
@@ -19,6 +20,7 @@ class Vehicle:
         self.reached_destination = False  # 車輛是否到達終點
         self.start_road = start_road
         self.destination_road = destination_road
+        self.speed = 100 / globals.fps  # 車輛速度
 
     
 
@@ -30,13 +32,22 @@ class Vehicle:
  
         return path
 
-    def move(self):
-        """讓車輛沿路徑移動"""
-        if not self.reached_destination and self.path:
-            self.x, self.y = self.path.popleft()
-        if not self.path:  # 如果路徑空了，標記為到達終點
-            self.reached_destination = True
+    # def move(self):
+    #     """讓車輛沿路徑移動"""
+    #     if not self.reached_destination and self.path:
+    #         self.x, self.y = self.path.popleft()
+    #     if not self.path:  # 如果路徑空了，標記為到達終點
+    #         self.reached_destination = True
 
+    def move(self, direction):
+        if direction == "UP":
+            self.y -= self.speed
+        elif direction == "DOWN":
+            self.y += self.speed
+        elif direction == "LEFT":
+            self.x -= self.speed
+        elif direction == "RIGHT":
+            self.x += self.speed
 
     def draw(self, screen):
         """繪製車輛"""

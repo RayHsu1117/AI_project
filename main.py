@@ -9,12 +9,14 @@ import random
 pygame.init()
 screen = pygame.display.set_mode((600, 600))
 
-# 初始化車輛
-
+# 設定要初始化幾台車
+how_many_cars = 1
+# 初始化車輛s
 vehicles = []
-for i in range(5):
+for i in range(how_many_cars):
     vehicle = generate_vehicle()
     vehicles.append(vehicle)
+
 # 主程序
 def main():
     clock = pygame.time.Clock()
@@ -28,7 +30,7 @@ def main():
         draw_roads(screen)
         
         for vehicle in vehicles:
-            # vehicle.move()
+            vehicle.move("UP")
             vehicle.draw(screen)
             vehicle.draw_end(screen)
 
