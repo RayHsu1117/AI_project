@@ -12,10 +12,10 @@ screen = pygame.display.set_mode((602, 602))
 # 初始化車輛
 
 vehicles = []
-for i in range(5):
+for i in range(10):
     vehicle = generate_vehicle()
     vehicles.append(vehicle)
-# 主程序
+# 主程式
 def main():
     clock = pygame.time.Clock()
     while True:
