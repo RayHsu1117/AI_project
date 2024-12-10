@@ -28,12 +28,12 @@ def main():
         draw_roads(screen)
         
         for vehicle in vehicles:
-            # vehicle.move()
-            vehicle.draw(screen)
-            vehicle.draw_end(screen)
+            vehicle.move()  # 更新車輛位置
+            vehicle.draw(screen)  # 繪製車輛
+            vehicle.draw_end(screen)  # 繪製目標位置
 
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(30)  # 控制幀率
 
 if __name__ == "__main__":
     main()
