@@ -7,7 +7,7 @@ import random
 
 # 初始化 Pygame
 pygame.init()
-screen = pygame.display.set_mode((600, 600))
+screen = pygame.display.set_mode((602, 602))
 
 # 初始化車輛
 

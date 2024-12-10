@@ -1,8 +1,6 @@
 # vehicle.py
 from collections import deque
 import pygame
-# from start_end import generate_start, generate_end
-# from roads import roads
 from map import roads
 import random
 
