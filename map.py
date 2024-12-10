@@ -16,7 +16,7 @@ YELLOWLINE_SIZE = 10  # 黃線寬度
 WHITE = (255, 255, 255)
 GRAY = (200, 200, 200)
 BLACK = (0, 0, 0)
-
+YELLOW = (255, 255, 0)
 # UP = (0, 1)
 # DOWN = (0, -1)
 # LEFT = (-1, 0)
@@ -49,12 +49,12 @@ class Road:
         """
         計算道路的邊界，存為兩條線段
         """
-        if self.direction in ['up', 'down']:  # 垂直道路
+        if self.direction in ['UP', 'DOWN']:  # 垂直道路
             self.borders = [
                 ((self.x1, self.y1), (self.x1, self.y2)),  # 左邊界
                 ((self.x2, self.y1), (self.x2, self.y2))   # 右邊界
             ]
-        elif self.direction in ['left', 'right']:  # 水平道路
+        elif self.direction in ['LEFT', 'RIGHT']:  # 水平道路
             self.borders = [
                 ((self.x1, self.y1), (self.x2, self.y1)),  # 上邊界
                 ((self.x1, self.y2), (self.x2, self.y2))   # 下邊界
@@ -64,10 +64,19 @@ class Road:
         """
         在 Pygame 畫面上繪製邊界
         """
-        border_color = BLACK
         border_width = 2  # 邊界線寬
-        for border in self.borders:
-            pygame.draw.line(screen, border_color, border[0], border[1], border_width)
+        if self.direction == "UP":
+            pygame.draw.line(screen, YELLOW, self.borders[0][0], self.borders[0][1], border_width)
+            pygame.draw.line(screen, BLACK, self.borders[1][0], self.borders[1][1], border_width)
+        elif self.direction == "DOWN":
+            pygame.draw.line(screen, BLACK, self.borders[0][0], self.borders[0][1], border_width)
+            pygame.draw.line(screen, YELLOW, self.borders[1][0], self.borders[1][1], border_width)
+        elif self.direction == "LEFT":
+            pygame.draw.line(screen, BLACK, self.borders[0][0], self.borders[0][1], border_width)
+            pygame.draw.line(screen, YELLOW, self.borders[1][0], self.borders[1][1], border_width)
+        elif self.direction == "RIGHT":
+            pygame.draw.line(screen, YELLOW, self.borders[0][0], self.borders[0][1], border_width)
+            pygame.draw.line(screen, BLACK, self.borders[1][0], self.borders[1][1], border_width)    
 
 
 class Intersection:
@@ -151,7 +160,9 @@ roads = {
     'road_813': Road((580, 600, 400, 555), 'UP')
 }
     
-
+road_couples = [
+    ('road_131','road_141'),('road_132','road_142'),('road_133','road_143'),('road_331','road_341'),('road_332','road_342'),('road_333','road_343'),('road_531','road_541'),('road_532','road_542'),('road_533','road_543'),('road_731','road_741'),('road_732','road_742'),('road_733','road_743'),('road_221','road_211'),('road_222','road_212'),('road_223','road_213'),('road_421','road_411'),('road_422','road_412'),('road_423','road_413'),('road_621','road_611'),('road_622','road_612'),('road_623','road_613'),('road_821','road_811'),('road_822','road_812'),('road_823','road_813')
+]
 
 intersections = {
     'intersection_1': Intersection((0, 45, 0, 45)),
@@ -171,6 +182,4 @@ intersections = {
     'intersection_15': Intersection((355, 400, 555, 600)),
     'intersection_16': Intersection((555, 600, 555, 600))
 }
-
-
 
