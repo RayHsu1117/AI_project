@@ -37,6 +37,7 @@ class Vehicle:
         if not self.path:  # 如果路徑空了，標記為到達終點
             self.reached_destination = True
 
+
     def draw(self, screen):
         """繪製車輛"""
         color = CAR_REACHED_COLOR if self.reached_destination else CAR_COLOR
