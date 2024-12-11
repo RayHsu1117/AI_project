@@ -37,7 +37,7 @@ def draw_roads(screen):
 def draw_arrow(screen, x, y, direction):
     """在給定位置繪製箭頭以表示方向"""
     arrow_color = (255, 255, 255)  # 白色箭頭
-    arrow_size = 6  # 縮小的箭頭大小
+    arrow_size = 4  # 縮小的箭頭大小
     if direction == "UP":
         points = [(x, y - arrow_size), (x - arrow_size, y + arrow_size), (x + arrow_size, y + arrow_size)]
     elif direction == "DOWN":
