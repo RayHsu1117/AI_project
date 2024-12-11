@@ -57,7 +57,7 @@ class Vehicle:
         path.append(destination)
         return path
 
-    def move(self):
+    def move(self, vehicles):
         #"""讓車輛沿路徑移動"""
         #if not self.reached_destination and self.path:
         #    self.x, self.y = self.path.popleft()

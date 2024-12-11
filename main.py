@@ -28,7 +28,7 @@ def main():
         draw_roads(screen)
         
         for vehicle in vehicles:
-            vehicle.move()  # 更新車輛位置
+            vehicle.move(vehicles)  # 更新車輛位置
             vehicle.draw(screen)  # 繪製車輛
             vehicle.draw_end(screen)  # 繪製目標位置
 
