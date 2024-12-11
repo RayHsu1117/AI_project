@@ -13,6 +13,8 @@ CAR_REACHED_COLOR = (255, 165, 0)  # 橘色
 vehicle_counter = 1
 # 每次移動的步長
 step = 2
+# 迴轉與左轉的移動幅度
+TURN_SHIFT = 25
 
 class Vehicle:
     def __init__(self, start, destination,start_road,destination_road, vehicle_id):
@@ -21,29 +23,28 @@ class Vehicle:
         self.start = start
         self.destination = destination
         self.reached_destination = False  # 車輛是否到達終點
-        self.start_road = start_road
-        self.destination_road = destination_road
+        self.start_road = start_road # 起點所在路名
+        self.destination_road = destination_road # 終點所在路名
         self.vehicle_id = vehicle_id  # 使用傳入的車號
 
-        self.previous_place = self.find_place(self.x, self.y)
+        self.previous_place = start_road
         self.current_place = self.previous_place
+        self.current_direction = roads[self.current_place].direction # 初始位置一定是在道路上
+        self.most_front = 0 # 用於正在進入十字路口時的前進距離上限
+        self.meet_x = False
+        self.meet_y = False
 
+        self.has_action = False
+        self.action = None
+        self.most_front_turn = 0 # 用於在十字路口路中央時的前進距離上限 (用於左轉)
+        self.most_left_turn = 0 # 用於在十字路口路中央時的左進距離上限 (用於迴轉)
 
-
+    # 沒用到
     def calculate_path(self, start, destination):
         """計算車輛移動的路徑"""
         sx, sy = start
         dx, dy = destination
         path = []
-        
-        start_road = self.find_place(sx, sy)
-        dest_road = self.find_place(dx, dy)
-        print("start: "+start_road)
-        print(roads[start_road].direction)
-        print("dest: "+dest_road)
-        print(roads[dest_road].direction)
-        
-
         # 簡單直線移動邏輯 (分別處理 x 和 y)
         if sx != dx:
             for x in range(sx, dx, step if dx > sx else -step):
@@ -64,20 +65,137 @@ class Vehicle:
         #if not self.path:  # 如果路徑空了，標記為到達終點
         #    self.reached_destination = True
 
-        #簡易greedy
-        if self.is_on_road() is True:
-                direction = roads[self.current_place].direction
-                if direction == 'UP':
+        #print(self.find_place(self.x, self.y))
+        #print(self.has_action)
+        if not self.reached_destination:
+            dx, dy = self.destination
+            delta_x = dx-self.x
+            delta_y = dy-self.y
+            if self.is_on_road() is True:
+                # 已完成轉彎動作因此將相關flags設為false，並根據所在道路方向記錄行車方向
+                if self.has_action:
+                    self.is_middle = False
+                    self.has_action = False
+                    self.current_place = self.find_place(self.x, self.y)
+                    self.current_direction = roads[self.current_place].direction
+
+                # 在路上的車只能一直走到路口前方
+                if self.current_direction == 'UP':
+                    self.most_front = self.y-VEHICLE_SIZE
                     self.y -= step
-                elif direction == 'DOWN':
+                elif self.current_direction == 'DOWN':
+                    self.most_front = self.y+VEHICLE_SIZE
                     self.y += step
-                elif direction == 'LEFT':
+                elif self.current_direction == 'LEFT':
+                    self.most_front = self.x-VEHICLE_SIZE
                     self.x -= step
                 else:
+                    self.most_front = self.x+VEHICLE_SIZE
                     self.x += step
-            #else:
+            else:
+                # 先走到路口中央
+                if not self.has_action:
+                    if self.current_direction == 'UP' and self.y > self.most_front:
+                        self.y -= step
+                    elif self.current_direction == 'DOWN' and self.y < self.most_front:
+                        self.y += step
+                    elif self.current_direction == 'LEFT' and self.x > self.most_front:
+                        self.x -= step
+                    elif self.current_direction == 'RIGHT' and self.x < self.most_front:
+                        self.x += step
+                    else:
+                        self.has_action = True
+                        if self.current_direction == 'UP':
+                            self.most_front_turn = self.y-TURN_SHIFT
+                            self.most_left_turn = self.x-TURN_SHIFT
+                        elif self.current_direction == 'DOWN':
+                            self.most_front_turn = self.y+TURN_SHIFT
+                            self.most_left_turn = self.x+TURN_SHIFT
+                        elif self.current_direction == 'LEFT':
+                            self.most_front_turn = self.x-TURN_SHIFT
+                            self.most_left_turn = self.y+TURN_SHIFT
+                        elif self.current_direction == 'RIGHT':
+                            self.most_front_turn = self.x+TURN_SHIFT
+                            self.most_left_turn = self.y-TURN_SHIFT
+                # 到了路口中央馬上執行行動 (行動後總是會走到另外一條道路上，到時候self.has_action會變回false)
+                # 在此之前可先決定策略，並存進self.action中，之後直接套用self.do_action(self.action)
+                else:
+                    self.do_action('LEFT') # 'AHEAD': 直行; 'BACK': 迴轉; 'LEFT': 左轉; 'RIGHT': 右轉
+                
+                is_pair = self.is_pair(self.current_place, self.destination_road)
+                if is_pair: # 迴轉
+                    pass
+                else: # 先上下後左右
+                    pass
+            if abs(delta_x) < step and abs(delta_y) < step:
+                self.reached_destination = True
 
 
+    def do_action(self, direction):
+        # 這裡的direction是指對車子而言的欲轉彎方向，而self.current_direction為旁觀者所看的車頭朝向方向
+        if direction == 'AHEAD': # 直行
+            if self.current_direction == 'UP':
+                self.y -= step
+            elif self.current_direction == 'DOWN':
+                self.y += step
+            elif self.current_direction == 'LEFT':
+                self.x -= step
+            elif self.current_direction == 'RIGHT':
+                self.x += step
+        elif direction == 'BACK': # 迴轉 (我父親時常這麼做，所以這是合理的行為)
+            if self.current_direction == 'UP':
+                if self.x > self.most_left_turn:
+                    self.x -= step
+                else:
+                    self.y += step
+            elif self.current_direction == 'DOWN':
+                if self.x < self.most_left_turn:
+                    self.x += step
+                else:
+                    self.y -= step
+            elif self.current_direction == 'LEFT':
+                if self.y < self.most_left_turn:
+                    self.y += step
+                else:
+                    self.x += step
+            elif self.current_direction == 'RIGHT':
+                if self.y > self.most_left_turn:
+                    self.y -= step
+                else:
+                    self.x -= step
+        elif direction == 'LEFT': # 左轉
+            if self.current_direction == 'UP':
+                if self.y > self.most_front_turn:
+                    self.y -= step
+                else:
+                    self.x -= step
+            elif self.current_direction == 'DOWN':
+                if self.y < self.most_front_turn:
+                    self.y += step
+                else:
+                    self.x += step
+            elif self.current_direction == 'LEFT':
+                if self.x > self.most_front_turn:
+                    self.x -= step
+                else:
+                    self.y += step
+            elif self.current_direction == 'RIGHT':
+                if self.x < self.most_front_turn:
+                    self.x += step
+                else:
+                    self.y -= step
+        elif direction == direction == 'RIGHT': # 右轉
+            if self.current_direction == 'UP':
+                self.x += step
+            elif self.current_direction == 'DOWN':
+                self.x -= step
+            elif self.current_direction == 'LEFT':
+                self.y -= step
+            elif self.current_direction == 'RIGHT':
+                self.y += step
+        else:
+            print("Wrong.")
+            
 
 
 
@@ -100,6 +218,8 @@ class Vehicle:
             return True
         return False
         
+    def is_pair(self, road1, road2):
+        return (road1, road2) in road_couples or (road2, road1) in road_couples
 
     def find_place(self, x, y):
         """
@@ -118,23 +238,22 @@ class Vehicle:
             y + VEHICLE_SIZE
         )
 
-        # 檢查是否與某個路口有重疊
-        for name, intersection in intersections.items():
+        # 檢查是否與某條道路有重疊 (只有車子全部都在車道內才能算是在車道內)
+        for name, road in roads.items():
             if (
-                vehicle_box[0] < intersection.x2 and
-                vehicle_box[1] > intersection.x1 and
-                vehicle_box[2] < intersection.y2 and
-                vehicle_box[3] > intersection.y1
+                vehicle_box[0] >= road.x1 and
+                vehicle_box[1] <= road.x2 and
+                vehicle_box[2] >= road.y1 and
+                vehicle_box[3] <= road.y2
             ):
                 return name
 
-        # 檢查是否與某條道路有重疊
-        for name, road in roads.items():
-            if (
-                vehicle_box[0] <= road.x2 and
-                vehicle_box[1] >= road.x1 and
-                vehicle_box[2] <= road.y2 and
-                vehicle_box[3] >= road.y1
+        # 檢查是否與某個路口有重疊 (只要有一邊踏進十字路口就算是在十字路口內了)
+        for name, intersection in intersections.items():
+            if (# 上邊或下邊在內
+                (vehicle_box[0] >= intersection.x1 and vehicle_box[1] <= intersection.x2 and vehicle_box[2] <= intersection.y2 and vehicle_box[3] >= intersection.y1)
+                or # 左邊或右邊在內
+                (vehicle_box[2] >= intersection.y1 and vehicle_box[3] <= intersection.y2 and vehicle_box[0] <= intersection.x2 and vehicle_box[1] >= intersection.x1)
             ):
                 return name
 
