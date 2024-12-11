@@ -435,7 +435,7 @@ def generate_random():
     """生成隨機的點"""
     road = random.choice(list(roads.keys()))
     if(roads[road].direction == "LEFT" or roads[road].direction == "RIGHT"):
-        point = (random.randint(roads[road].x1,roads[road].x2-VEHICLE_SIZE),random.randint(roads[road].y1+2,roads[road].y2-VEHICLE_SIZE))
+        point = (random.randint(roads[road].x1,roads[road].x2-VEHICLE_SIZE),roads[road].y1+3)
     else:    
-        point = (random.randint(roads[road].x1+2,roads[road].x2-VEHICLE_SIZE),random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
+        point = (roads[road].x1+3,random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
     return point,road
