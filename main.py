@@ -10,7 +10,7 @@ pygame.init()
 screen = pygame.display.set_mode((600, 600))
 
 # 設定要初始化幾台車
-how_many_cars = 3
+how_many_cars = 5
 # 初始化車輛s
 vehicles = []
 for i in range(how_many_cars):
