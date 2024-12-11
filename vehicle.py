@@ -104,6 +104,7 @@ class Vehicle:
                     elif self.current_direction == 'RIGHT' and self.x < self.most_front:
                         self.x += step
                     else:
+                        self.action = self.greedy_agent() # 策略
                         self.has_action = True
                         if self.current_direction == 'UP':
                             self.most_front_turn = self.y-TURN_SHIFT
@@ -120,15 +121,11 @@ class Vehicle:
                 # 到了路口中央馬上執行行動 (行動後總是會走到另外一條道路上，到時候self.has_action會變回false)
                 # 在此之前可先決定策略，並存進self.action中，之後直接套用self.do_action(self.action)
                 else:
-                    self.do_action('LEFT') # 'AHEAD': 直行; 'BACK': 迴轉; 'LEFT': 左轉; 'RIGHT': 右轉
+                    self.do_action(self.action) # 'AHEAD': 直行; 'BACK': 迴轉; 'LEFT': 左轉; 'RIGHT': 右轉
                 
-                is_pair = self.is_pair(self.current_place, self.destination_road)
-                if is_pair: # 迴轉
-                    pass
-                else: # 先上下後左右
-                    pass
-            if abs(delta_x) < step and abs(delta_y) < step:
+            if abs(delta_x) < step*3 and abs(delta_y) < step*3: # 容錯誤差
                 self.reached_destination = True
+                print("Vehicle "+str(self.vehicle_id)+" arrives.")
 
 
     def do_action(self, direction):
@@ -196,8 +193,137 @@ class Vehicle:
         else:
             print("Wrong.")
             
+    def greedy_agent(self): # 這個策略似乎非常喜歡迴轉
+        dx, dy = self.destination
+        
+        # 先左右後上下
+        action = self.is_near(self.destination_road)
+        if action is None:
+            delta_block_x = self.cut_corners_block_counter(self.x, dx)
+            delta_block_y = self.cut_corners_block_counter(self.y, dy)
+            if self.current_direction == 'UP':
+                if delta_block_x >= 1:
+                    return 'RIGHT'
+                elif delta_block_x <= -1:
+                    return 'LEFT'
+                elif delta_block_y >= 1:
+                    return 'BACK'
+                elif delta_block_y <= -1:
+                    return 'AHEAD'
+            elif self.current_direction == 'DOWN':
+                if delta_block_x >= 1:
+                    return 'LEFT'
+                elif delta_block_x <= -1:
+                    return 'RIGHT'
+                elif delta_block_y >= 1:
+                    return 'AHEAD'
+                elif delta_block_y <= -1:
+                    return 'BACK'
+            elif self.current_direction == 'LEFT':
+                if delta_block_x >= 1:
+                    return 'BACK'
+                elif delta_block_x <= -1:
+                    return 'AHEAD'
+                elif delta_block_y >= 1:
+                    return 'LEFT'
+                elif delta_block_y <= -1:
+                    return 'RIGHT'
+            elif self.current_direction == 'RIGHT':
+                if delta_block_x >= 1:
+                    return 'AHEAD'
+                elif delta_block_x <= -1:
+                    return 'BACK'
+                elif delta_block_y >= 1:
+                    return 'RIGHT'
+                elif delta_block_y <= -1:
+                    return 'LEFT'
+            else:
+                print("Not_Well_designed")
+                return 'BACK'
+        else:
+            return action
+    
+    def is_near(self, dest_road): # if is_near: 表示只要一或二個動作就可以到目的地了; 如果是會回傳動作，如果不是則回傳None
+        extend_vertical = 45 # 假設車子前進或後退45單位
+        extend_horizon = 45 # 假設車子前進或後退45單位
+        if self.current_direction == 'UP': # 車頭朝前
+            future_road = self.find_place(self.x, self.y-extend_vertical)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'AHEAD'
+            future_road = self.find_place(self.x, self.y+extend_vertical)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'BACK'
+            future_road = self.find_place(self.x-extend_horizon, self.y)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'LEFT'
+            future_road = self.find_place(self.x+extend_horizon, self.y)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'RIGHT'
+        elif self.current_direction == 'DOWN': # 車頭朝後
+            future_road = self.find_place(self.x, self.y+extend_vertical)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'AHEAD'
+            future_road = self.find_place(self.x, self.y-extend_vertical)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'BACK'
+            future_road = self.find_place(self.x+extend_horizon, self.y)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'LEFT'
+            future_road = self.find_place(self.x-extend_horizon, self.y)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'RIGHT'
+        elif self.current_direction == 'LEFT': # 車頭朝左
+            future_road = self.find_place(self.x-extend_horizon, self.y)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'AHEAD'
+            future_road = self.find_place(self.x+extend_horizon, self.y)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'BACK'
+            future_road = self.find_place(self.x, self.y+extend_vertical)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'LEFT'
+            future_road = self.find_place(self.x, self.y-extend_vertical)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'RIGHT'
+        elif self.current_direction == 'RIGHT': # 車頭朝右
+            future_road = self.find_place(self.x+extend_horizon, self.y)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'AHEAD'
+            future_road = self.find_place(self.x-extend_horizon, self.y)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'BACK'
+            future_road = self.find_place(self.x, self.y-extend_vertical)
+            if self.is_pair(future_road, dest_road) or future_road == dest_road:
+                return 'LEFT'
+            future_road = self.find_place(self.x, self.y+extend_vertical)
+            if future_road == dest_road or self.is_pair(future_road, dest_road):
+                return 'RIGHT'
+        else:
+            return None
 
-
+    def cut_corners_block_counter(self, self_ordinate, dest_ordinate): # 由於地圖的對稱性所以得以投機取巧地不須區分x與y
+        # 0 45   200 245   355 400   555 600
+        self_block = self.cut_corners_switch_case(self_ordinate)
+        dest_block = self.cut_corners_switch_case(dest_ordinate)
+        return dest_block - self_block
+            
+    def cut_corners_switch_case(self, number): # 由於地圖的對稱性所以投機取巧地寫了這個分類程式以減少程式碼長度
+        # 分類成立基於起點與終點都在道路上且不會重疊到十字路口
+        if 0 <= number and number < 45:
+            return 0.5
+        elif number < 200:
+            return 1
+        elif number < 245:
+            return 1.5
+        elif number < 355:
+            return 2
+        elif number < 400:
+            return 2.5
+        elif number < 555:
+            return 3
+        else:
+            return 3.5
+            
 
     def is_on_road(self):
         if (((self.x >= 45 and self.x+VEHICLE_SIZE <= 200) or
@@ -258,7 +384,7 @@ class Vehicle:
                 return name
 
         # 若不在任何道路或路口
-        return "Not on any road or intersection"
+        return 'Not on any road or intersection'
 
     def draw(self, screen):
         """繪製車輛"""
@@ -309,7 +435,7 @@ def generate_random():
     """生成隨機的點"""
     road = random.choice(list(roads.keys()))
     if(roads[road].direction == "LEFT" or roads[road].direction == "RIGHT"):
-        point = (random.randint(roads[road].x1,roads[road].x2-VEHICLE_SIZE),random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
+        point = (random.randint(roads[road].x1,roads[road].x2-VEHICLE_SIZE),random.randint(roads[road].y1+2,roads[road].y2-VEHICLE_SIZE))
     else:    
-        point = (random.randint(roads[road].x1,roads[road].x2-VEHICLE_SIZE),random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
+        point = (random.randint(roads[road].x1+2,roads[road].x2-VEHICLE_SIZE),random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
     return point,road
