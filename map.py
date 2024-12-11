@@ -98,7 +98,7 @@ class Intersection:
 
 ''' road命名規則:
 1. 水平方向第一位數字是基數，垂直方向第一位數字是偶數
-2. 依據行進方向分為1上2下3左4右，第二位數字由此決定
+2. 依據行進方向分為 1上 2下 3左 4右，第二位數字由此決定
 3. 第三位數字由左到右排序
 '''
 
@@ -169,14 +169,17 @@ intersections = {
     'intersection_2': Intersection((200, 245, 0, 45)),
     'intersection_3': Intersection((355, 400, 0, 45)),
     'intersection_4': Intersection((555, 600, 0, 45)),
+
     'intersection_5': Intersection((0, 45, 200, 245)),
     'intersection_6': Intersection((200, 245, 200, 245)),
     'intersection_7': Intersection((355, 400, 200, 245)),
     'intersection_8': Intersection((555, 600, 200, 245)),
+
     'intersection_9': Intersection((0, 45, 355, 400)),
     'intersection_10': Intersection((200, 245, 355, 400)),
     'intersection_11': Intersection((355, 400, 355, 400)),
     'intersection_12': Intersection((555, 600, 355, 400)),
+    
     'intersection_13': Intersection((0, 45, 555, 600)),
     'intersection_14': Intersection((200, 245, 555, 600)),
     'intersection_15': Intersection((355, 400, 555, 600)),
