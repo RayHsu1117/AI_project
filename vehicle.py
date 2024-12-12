@@ -77,87 +77,89 @@ class Vehicle:
     def move(self, vehicles):
         #print(self.find_place(self.x, self.y))
         #print(self.has_action)
-        if not self.reached_destination:
-            dx, dy = self.destination
-            delta_x = dx-self.x
-            delta_y = dy-self.y
+        if self.reached_destination:
+            return
 
-            if self.is_on_road(self.x, self.y):
-                # 已完成轉彎動作因此將相關flags設為false，並根據所在道路方向記錄行車方向
-                if self.has_action:
-                    self.is_middle = False
-                    self.has_action = False
-                    self.just_inter_intersection = False
-                    self.inter_intersection = False
-                    self.current_place = self.find_place(self.x, self.y)
-                    self.current_direction = roads[self.current_place].direction
-                    self.adjust_location()
-                    if self.current_direction == 'UP':
-                        self.most_front = roads[self.current_place].y1-VEHICLE_SIZE-2
-                    elif self.current_direction == 'DOWN':
-                        self.most_front = roads[self.current_place].y2+2
-                    elif self.current_direction == 'LEFT':
-                        self.most_front = roads[self.current_place].x1-VEHICLE_SIZE-2
-                    else:
-                        self.most_front = roads[self.current_place].x2+2
+        dx, dy = self.destination
+        delta_x = dx-self.x
+        delta_y = dy-self.y
 
-                # 在路上的車只能一直走到路口前方
-                if self.need_stop_direct(vehicles):
-                    pass
-                elif self.current_direction == 'UP':
-                    self.y -= step
+        if self.is_on_road(self.x, self.y):
+            # 已完成轉彎動作因此將相關flags設為false，並根據所在道路方向記錄行車方向
+            if self.has_action:
+                self.is_middle = False
+                self.has_action = False
+                self.just_inter_intersection = False
+                self.inter_intersection = False
+                self.current_place = self.find_place(self.x, self.y)
+                self.current_direction = roads[self.current_place].direction
+                self.adjust_location()
+                if self.current_direction == 'UP':
+                    self.most_front = roads[self.current_place].y1-VEHICLE_SIZE-2
                 elif self.current_direction == 'DOWN':
-                    self.y += step
+                    self.most_front = roads[self.current_place].y2+2
                 elif self.current_direction == 'LEFT':
-                    self.x -= step
+                    self.most_front = roads[self.current_place].x1-VEHICLE_SIZE-2
                 else:
-                    self.x += step
+                    self.most_front = roads[self.current_place].x2+2
+
+            # 在路上的車只能一直走到路口前方
+            if self.need_stop_direct(vehicles):
+                pass
+            elif self.current_direction == 'UP':
+                self.y -= step
+            elif self.current_direction == 'DOWN':
+                self.y += step
+            elif self.current_direction == 'LEFT':
+                self.x -= step
             else:
-                # 先走到路口中央
-                if self.just_inter_intersection == False:
-                    self.just_inter_intersection = True
+                self.x += step
+        else:
+            # 先走到路口中央
+            if self.just_inter_intersection == False:
+                self.just_inter_intersection = True
+                self.stop = True
+                self.previous_place = self.current_place
+                self.current_place = self.find_place(self.x, self.y)
+            if self.just_inter_intersection == True and self.stop == True:
+                if self.need_stop_before_intersection(vehicles):
                     self.stop = True
-                    self.previous_place = self.current_place
-                    self.current_place = self.find_place(self.x, self.y)
-                if self.just_inter_intersection == True and self.stop == True:
-                    if self.need_stop_before_intersection(vehicles):
-                        self.stop = True
-                    else:
-                        self.stop = False
-                elif not self.has_action:
-                    if self.inter_intersection == False:
-                        self.inter_intersection = True
-                    if self.current_direction == 'UP' and self.y > self.most_front:
-                        self.y -= step
-                    elif self.current_direction == 'DOWN' and self.y < self.most_front:
-                        self.y += step
-                    elif self.current_direction == 'LEFT' and self.x > self.most_front:
-                        self.x -= step
-                    elif self.current_direction == 'RIGHT' and self.x < self.most_front:
-                        self.x += step
-                    else:
-                        self.action = self.greedy_agent() # 策略
-                        self.has_action = True
-                        if self.current_direction == 'UP':
-                            self.most_front_turn = intersections[self.current_place].y1+2
-                            self.most_left_turn = intersections[self.current_place].x1+2
-                        elif self.current_direction == 'DOWN':
-                            self.most_front_turn = intersections[self.current_place].y2-VEHICLE_SIZE-2
-                            self.most_left_turn = intersections[self.current_place].x2-VEHICLE_SIZE-2
-                        elif self.current_direction == 'LEFT':
-                            self.most_front_turn = intersections[self.current_place].x1+2
-                            self.most_left_turn = intersections[self.current_place].y2-VEHICLE_SIZE-2
-                        elif self.current_direction == 'RIGHT':
-                            self.most_front_turn = intersections[self.current_place].x2-VEHICLE_SIZE-2
-                            self.most_left_turn = intersections[self.current_place].y1+2
-                # 到了路口中央馬上執行行動 (行動後總是會走到另外一條道路上，到時候self.has_action會變回false)
-                # 在此之前可先決定策略，並存進self.action中，之後直接套用self.do_action(self.action)
                 else:
-                    self.do_action(self.action) # 'AHEAD': 直行; 'BACK': 迴轉; 'LEFT': 左轉; 'RIGHT': 右轉
-                
-            if abs(delta_x) < ERROR_DISTANCE and abs(delta_y) < ERROR_DISTANCE: # 容錯誤差
-                self.reached_destination = True
-                print("Vehicle "+str(self.vehicle_id)+" arrives.")
+                    self.stop = False
+            elif not self.has_action:
+                if self.inter_intersection == False:
+                    self.inter_intersection = True
+                if self.current_direction == 'UP' and self.y > self.most_front:
+                    self.y -= step
+                elif self.current_direction == 'DOWN' and self.y < self.most_front:
+                    self.y += step
+                elif self.current_direction == 'LEFT' and self.x > self.most_front:
+                    self.x -= step
+                elif self.current_direction == 'RIGHT' and self.x < self.most_front:
+                    self.x += step
+                else:
+                    self.action = self.greedy_agent() # 策略
+                    self.has_action = True
+                    if self.current_direction == 'UP':
+                        self.most_front_turn = intersections[self.current_place].y1+2
+                        self.most_left_turn = intersections[self.current_place].x1+2
+                    elif self.current_direction == 'DOWN':
+                        self.most_front_turn = intersections[self.current_place].y2-VEHICLE_SIZE-2
+                        self.most_left_turn = intersections[self.current_place].x2-VEHICLE_SIZE-2
+                    elif self.current_direction == 'LEFT':
+                        self.most_front_turn = intersections[self.current_place].x1+2
+                        self.most_left_turn = intersections[self.current_place].y2-VEHICLE_SIZE-2
+                    elif self.current_direction == 'RIGHT':
+                        self.most_front_turn = intersections[self.current_place].x2-VEHICLE_SIZE-2
+                        self.most_left_turn = intersections[self.current_place].y1+2
+            # 到了路口中央馬上執行行動 (行動後總是會走到另外一條道路上，到時候self.has_action會變回false)
+            # 在此之前可先決定策略，並存進self.action中，之後直接套用self.do_action(self.action)
+            else:
+                self.do_action(self.action) # 'AHEAD': 直行; 'BACK': 迴轉; 'LEFT': 左轉; 'RIGHT': 右轉
+            
+        if abs(delta_x) < ERROR_DISTANCE and abs(delta_y) < ERROR_DISTANCE: # 容錯誤差
+            self.reached_destination = True
+            print("Vehicle "+str(self.vehicle_id)+" arrives.")
 
     def do_action(self, direction):
         # 這裡的direction是指對車子而言的欲轉彎方向，而self.current_direction為旁觀者所看的車頭朝向方向

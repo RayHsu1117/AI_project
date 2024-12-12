@@ -10,7 +10,7 @@ def draw_roads(screen):
     """繪製所有道路"""
     screen.fill(WHITE)
     for intersection in intersections:
-        intersections[intersection].draw_intersection(screen) 
+        intersections[intersection].draw_intersection(screen)
     for road_name, road in roads.items():
         road.draw_road(screen)
         road.draw_borders(screen)
