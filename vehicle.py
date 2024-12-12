@@ -48,23 +48,12 @@ class Vehicle:
         self.inter_intersection = False
 
     def need_stop_direct(self, vehicles): # 考慮在道路直行時是否需停(是否在小於安全距離的情況下在開在別臺車後面)
-        for vehicle in vehicles:
-            if (self.current_place == vehicle.current_place or (not vehicle.is_on_road(vehicle.x, vehicle.y) and self.current_place == vehicle.previous_place)) and self.vehicle_id != vehicle.vehicle_id and not vehicle.reached_destination:
-                if ((self.current_direction == 'UP' and abs(self.y-vehicle.y) < SAFTY_DISTANCE and self.y > vehicle.y) or 
-                    (self.current_direction == 'DOWN' and abs(self.y-vehicle.y) < SAFTY_DISTANCE and self.y < vehicle.y) or
-                    (self.current_direction == 'LEFT' and abs(self.x-vehicle.x) < SAFTY_DISTANCE and self.x > vehicle.x) or
-                    (self.current_direction == 'RIGHT' and abs(self.x-vehicle.x) < SAFTY_DISTANCE and self.x < vehicle.x)):
-                    self.stop = True
-                    return True
+        """這個 branch 上不考慮了"""
         self.stop = False
         return False
 
     def need_stop_before_intersection(self, vehicles):
-        for vehicle in vehicles:
-            if self.vehicle_id != vehicle.vehicle_id and self.current_place == vehicle.current_place and not vehicle.reached_destination:
-                #print(str(self.vehicle_id)+" and "+str(vehicle.vehicle_id))
-                if vehicle.inter_intersection == True and not vehicle.stop:
-                    return True
+        """這個 branch 上不考慮了"""
         return False
     
     def adjust_location(self): # 調整使車在路中央
