@@ -2,7 +2,7 @@
 import pygame
 from draw import draw_roads
 # from roads import roads
-from vehicle import generate_vehicle, car_crash, every_vehicle_reached_end
+from vehicle import generate_vehicles, car_crash, every_vehicle_reached_end
 import random
 
 # 初始化 Pygame
@@ -10,11 +10,9 @@ pygame.init()
 screen = pygame.display.set_mode((602, 602))
 
 # 初始化車輛
+VEHICLE_AMOUNT = 10
+vehicles = generate_vehicles(VEHICLE_AMOUNT)
 
-vehicles = []
-for i in range(20):
-    vehicle = generate_vehicle()
-    vehicles.append(vehicle)
 # 主程式
 def main():
     clock = pygame.time.Clock()
@@ -23,13 +21,14 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                continue
 
         # 繪製場景
         draw_roads(screen)
         
         for vehicle in vehicles:
             vehicle.move(vehicles)  # 更新車輛位置
-            vehicle.draw_car(screen)  # 繪製車輛
+            vehicle.draw(screen)  # 繪製車輛
             vehicle.draw_end(screen)  # 繪製目標位置
         
         # Check for collision or all vehicles reaching their destination
