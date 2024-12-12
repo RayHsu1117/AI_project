@@ -12,7 +12,7 @@ CAR_REACHED_COLOR = (255, 165, 0)  # 橘色
 # 車輛編號計數器
 vehicle_counter = 1
 # 每次移動的步長
-step = 2 # 當調整至5及以上時會出問題
+step = 4 # 當調整至5及以上時會出問題
 # 迴轉與左轉的移動幅度
 TURN_SHIFT = 25
 # 安全距離
@@ -437,7 +437,7 @@ class Vehicle:
         # 若不在任何道路或路口
         return 'Not on any road or intersection'
 
-    def draw_car(self, screen):
+    def draw(self, screen):
         """繪製車輛"""
         color = CAR_REACHED_COLOR if self.reached_destination else CAR_COLOR
         pygame.draw.rect(screen, color, (self.x, self.y, VEHICLE_SIZE, VEHICLE_SIZE))
@@ -463,30 +463,58 @@ class Vehicle:
         screen.blit(text, text_rect)  # 把車號渲染到畫面
 
 
-def generate_vehicle():
+def generate_vehicles(amount):
     """在隨機道路上隨機生成車輛"""
-    global vehicle_counter  # 引用全局車輛編號變數
-    try:
-        start_point, start_road = generate_random()
-        destination_point, destination_road = generate_random()
-        
-        # 創建車輛並將當前車號傳入
-        vehicle = Vehicle(start_point, destination_point, start_road, destination_road, vehicle_counter)
-        
-        # 車號遞增
-        vehicle_counter += 1
-        
-        return vehicle
+    vehicles = []
+    current_amount = 0
 
-    except Exception as e:
-        print(f"Error generating vehicle : {e}")
-        return None
+    # 第一台車
+    start_point, start_road = pick_random_location()
+    destination_point, destination_road = pick_random_location()
+    current_amount += 1
+    vehicle = Vehicle(start_point, destination_point, start_road, destination_road, current_amount)
+    vehicles.append(vehicle)
+    
+    # 之後的車
+    while current_amount < amount:
+        start_point, start_road = pick_random_location()
+        destination_point, destination_road = pick_random_location()
+        is_all_apart = True
+        for gotten_vehicle in vehicles:
+            if not is_apart(start_point, start_road, gotten_vehicle.start, gotten_vehicle.start_road) or not is_apart(destination_point, destination_road, gotten_vehicle.destination, gotten_vehicle.destination_road):
+                is_all_apart = False
+                break
+        if is_all_apart:
+            current_amount += 1
+            vehicle = Vehicle(start_point, destination_point, start_road, destination_road, current_amount)
+            vehicles.append(vehicle)
+    
+    return vehicles
 
-def generate_random():
-    """生成隨機的點"""
-    road = random.choice(list(roads.keys()))
-    if(roads[road].direction == "LEFT" or roads[road].direction == "RIGHT"):
-        point = (random.randint(roads[road].x1,roads[road].x2-VEHICLE_SIZE),roads[road].y1+3)
-    else:    
-        point = (roads[road].x1+3,random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
-    return point,road
+def pick_random_location():
+    random_road = random.choice(list(roads.keys()))
+    x1, x2, y1, y2, direction = roads[random_road].x1, roads[random_road].x2, roads[random_road].y1, roads[random_road].y2, roads[random_road].direction
+    if direction == 'UP':
+        point = (x1+3, random.randint(y1, y2-VEHICLE_SIZE-2))
+    elif direction == 'DOWN':
+        point = (x1+2, random.randint(y1, y2-VEHICLE_SIZE-2))
+    elif direction == 'LEFT':
+        point = (random.randint(x1, x2-VEHICLE_SIZE-2), y1+2)
+    elif direction == 'RIGHT':
+        point = (random.randint(x1, x2-VEHICLE_SIZE-2), y1+3)
+    return point, random_road
+
+def is_apart(point1, road1, point2, road2):
+    if road1 != road2:
+        return True
+    else:
+        direction = roads[road1].direction
+        x1, y1 = point1
+        x2, y2 = point2
+        if direction == 'UP' or direction == 'DOWN':
+            if abs(y1-y2) > 3*VEHICLE_SIZE:
+                return True
+        elif direction == 'LEFT' or direction == 'RIGHT':
+            if abs(x1-x2) > 3*VEHICLE_SIZE:
+                return True
+    return False
