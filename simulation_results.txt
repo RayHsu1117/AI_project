@@ -1,12 +1,6 @@
-Successful
-Collision detected
-Successful
-Collision detected
-Collision detected
-Collision detected
-Collision detected
-Successful
-Collision detected
-Collision detected
-Successful
-Successful
+45: Successful
+1: Successful
+2: Successful
+3: Successful
+4: Successful
+5: Successful

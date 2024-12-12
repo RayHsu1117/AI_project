@@ -513,7 +513,7 @@ def car_crash(vehicles):
             x2, y2 = vehicles[j].x, vehicles[j].y
             
             # 碰撞條件：兩車的 x, y 範圍重疊
-            if (abs(x1 - x2) < VEHICLE_SIZE) and (abs(y1 - y2) < VEHICLE_SIZE):
+            if (abs(x1 - x2) < (VEHICLE_SIZE-2)) and (abs(y1 - y2) < (VEHICLE_SIZE-2)):
                 return True
     return False
 

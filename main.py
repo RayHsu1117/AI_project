@@ -1,33 +1,33 @@
-# main.py
 import pygame
 import argparse
 from draw import draw_roads
 from vehicle import generate_vehicle, car_crash, every_vehicle_reached_end
 import globals
 
-# Add argparse to get simulation_id from the command line
+# Add argparse to get simulation_id and no-draw option from the command line
 parser = argparse.ArgumentParser(description="Simulate traffic with vehicles.")
 parser.add_argument("simulation_id", type=int, help="Simulation ID for logging results")
+parser.add_argument("--no-draw", action="store_true", help="Disable drawing for faster simulation")
 args = parser.parse_args()
+
+# Configure global drawing flag
+globals.enable_drawing = not args.no_draw
 
 how_many_cars = 10
 
-# 主程式
 def main(simulation_id):
-    # 初始化 Pygame
+    # Initialize Pygame
     pygame.init()
-    screen = pygame.display.set_mode((602, 602))
+    screen = pygame.display.set_mode((602, 602)) if globals.enable_drawing else None
 
-    # 初始化車輛
-    vehicles = []
-    for i in range(how_many_cars):
-        vehicle = generate_vehicle()
-        vehicles.append(vehicle)
+    # Initialize vehicles
+    vehicles = [generate_vehicle() for _ in range(how_many_cars)]
 
     clock = pygame.time.Clock()
-    running = True # add a running flag to control the main loop
+    running = True
     crash = False
-    total_frames = 0   # 總幀數
+    total_frames = 0  # Total frames
+
     while running:
         total_frames += 1
 
@@ -35,30 +35,34 @@ def main(simulation_id):
             if event.type == pygame.QUIT:
                 running = False
 
-        # 繪製場景
-        draw_roads(screen)
-        
+        # Skip drawing if disabled
+        if globals.enable_drawing:
+            draw_roads(screen)
+            for vehicle in vehicles:
+                vehicle.draw_car(screen)
+                vehicle.draw_end(screen)
+
+        # Update vehicle movement
         for vehicle in vehicles:
-            vehicle.move(vehicles, total_frames)  # 更新車輛位置
-            vehicle.draw_car(screen)  # 繪製車輛
-            vehicle.draw_end(screen)  # 繪製目標位置
-        
-        # Check for collision or all vehicles reaching their destination
+            vehicle.move(vehicles, total_frames)
+
+        # Check for collisions or all vehicles reaching their destination
         if car_crash(vehicles):
             with open("simulation_results.txt", "a") as file:
-                file.write(f"Collision detected\n")
-            running = False  # Exit the main loop
-            carsh = True
+                file.write(f"{simulation_id}: Collision\n")
+            running = False
+            crash = True
 
         if every_vehicle_reached_end(vehicles):
             with open("simulation_results.txt", "a") as file:
-                file.write(f"Successful\n")
-            running = False  # Exit the main loop
+                file.write(f"{simulation_id}: Successful\n")
+            running = False
 
-        pygame.display.flip()
-        clock.tick(globals.fps)  # 控制幀率
+        if globals.enable_drawing:
+            pygame.display.flip()
+            clock.tick(globals.fps)
 
-    # 分析並記錄模擬時間
+    # Analyze and log simulation time
     if not crash:
         analyze_simulation_time(vehicles, simulation_id, total_frames)
 

@@ -1,9 +1,24 @@
-Simulation 2: No vehicles reached destination.
+Simulation 45:
+  Average Time: 306.50 frames
+  Max Time: 442 frames
+  Min Time: 2 frames
+Simulation 1:
+  Average Time: 260.00 frames
+  Max Time: 371 frames
+  Min Time: 58 frames
 Simulation 2:
-  Average Time: 289.10 frames
-  Max Time: 496 frames
-  Min Time: 105 frames
-Simulation 100:
-  Average Time: 363.60 frames
-  Max Time: 741 frames
-  Min Time: 142 frames
+  Average Time: 356.20 frames
+  Max Time: 607 frames
+  Min Time: 179 frames
+Simulation 3:
+  Average Time: 250.30 frames
+  Max Time: 520 frames
+  Min Time: 86 frames
+Simulation 4:
+  Average Time: 301.70 frames
+  Max Time: 473 frames
+  Min Time: 129 frames
+Simulation 5:
+  Average Time: 332.80 frames
+  Max Time: 537 frames
+  Min Time: 69 frames
