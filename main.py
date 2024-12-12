@@ -14,7 +14,7 @@ args = parser.parse_args()
 globals.enable_drawing = not args.no_draw
 
 # 初始化車輛
-VEHICLE_AMOUNT = 10
+VEHICLE_AMOUNT = 15
 vehicles = generate_vehicles(VEHICLE_AMOUNT)
 
 def main(simulation_id):
