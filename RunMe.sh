@@ -4,7 +4,7 @@
 source /path/to/your/env/bin/activate  # Adjust this path to your Python environment
 
 # Loop to run the simulation 100 times
-for i in {1..1000}
+for i in {1..100}
 do
   echo "Running simulation $i..."
   python main.py $i --no-draw

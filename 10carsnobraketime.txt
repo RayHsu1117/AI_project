@@ -1,0 +1,109 @@
+Simulation 5:
+  Average Time: 165.50 frames
+  Max Time: 293 frames
+  Min Time: 87 frames
+Simulation 11:
+  Average Time: 158.40 frames
+  Max Time: 212 frames
+  Min Time: 105 frames
+Simulation 24:
+  Average Time: 153.50 frames
+  Max Time: 246 frames
+  Min Time: 68 frames
+Simulation 29:
+  Average Time: 184.00 frames
+  Max Time: 294 frames
+  Min Time: 92 frames
+Simulation 33:
+  Average Time: 148.60 frames
+  Max Time: 328 frames
+  Min Time: 28 frames
+Simulation 36:
+  Average Time: 118.40 frames
+  Max Time: 221 frames
+  Min Time: 42 frames
+Simulation 41:
+  Average Time: 152.00 frames
+  Max Time: 350 frames
+  Min Time: 10 frames
+Simulation 43:
+  Average Time: 147.80 frames
+  Max Time: 289 frames
+  Min Time: 70 frames
+Simulation 45:
+  Average Time: 196.20 frames
+  Max Time: 317 frames
+  Min Time: 104 frames
+Simulation 46:
+  Average Time: 162.50 frames
+  Max Time: 287 frames
+  Min Time: 85 frames
+Simulation 48:
+  Average Time: 153.80 frames
+  Max Time: 288 frames
+  Min Time: 34 frames
+Simulation 50:
+  Average Time: 151.00 frames
+  Max Time: 265 frames
+  Min Time: 1 frames
+Simulation 58:
+  Average Time: 149.90 frames
+  Max Time: 305 frames
+  Min Time: 63 frames
+Simulation 62:
+  Average Time: 177.70 frames
+  Max Time: 286 frames
+  Min Time: 111 frames
+Simulation 63:
+  Average Time: 159.70 frames
+  Max Time: 213 frames
+  Min Time: 51 frames
+Simulation 65:
+  Average Time: 153.40 frames
+  Max Time: 225 frames
+  Min Time: 83 frames
+Simulation 69:
+  Average Time: 176.00 frames
+  Max Time: 303 frames
+  Min Time: 100 frames
+Simulation 70:
+  Average Time: 164.90 frames
+  Max Time: 315 frames
+  Min Time: 45 frames
+Simulation 71:
+  Average Time: 172.70 frames
+  Max Time: 317 frames
+  Min Time: 32 frames
+Simulation 72:
+  Average Time: 132.40 frames
+  Max Time: 244 frames
+  Min Time: 47 frames
+Simulation 77:
+  Average Time: 159.60 frames
+  Max Time: 288 frames
+  Min Time: 19 frames
+Simulation 87:
+  Average Time: 162.80 frames
+  Max Time: 236 frames
+  Min Time: 44 frames
+Simulation 88:
+  Average Time: 150.80 frames
+  Max Time: 259 frames
+  Min Time: 3 frames
+Simulation 93:
+  Average Time: 174.00 frames
+  Max Time: 269 frames
+  Min Time: 44 frames
+Simulation 99:
+  Average Time: 164.00 frames
+  Max Time: 209 frames
+  Min Time: 99 frames
+Simulation 100:
+  Average Time: 141.10 frames
+  Max Time: 260 frames
+  Min Time: 19 frames
+
+Overall Simulation Metrics:
+  Average of Average Time: 158.87 frames
+  Average of Max Time: 273.80 frames
+  Average of Min Time: 57.15 frames

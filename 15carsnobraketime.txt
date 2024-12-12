@@ -1,0 +1,21 @@
+Simulation 21:
+  Average Time: 150.80 frames
+  Max Time: 273 frames
+  Min Time: 56 frames
+Simulation 38:
+  Average Time: 164.93 frames
+  Max Time: 249 frames
+  Min Time: 8 frames
+Simulation 79:
+  Average Time: 153.93 frames
+  Max Time: 234 frames
+  Min Time: 10 frames
+Simulation 88:
+  Average Time: 141.20 frames
+  Max Time: 241 frames
+  Min Time: 13 frames
+
+Overall Simulation Metrics:
+  Average of Average Time: 152.71 frames
+  Average of Max Time: 249.25 frames
+  Average of Min Time: 21.75 frames
