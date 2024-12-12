@@ -12,17 +12,17 @@ screen = pygame.display.set_mode((602, 602))
 # 初始化車輛
 
 vehicles = []
-for i in range(30):
+for i in range(20):
     vehicle = generate_vehicle()
     vehicles.append(vehicle)
 # 主程式
 def main():
     clock = pygame.time.Clock()
-    while True:
+    running = True # add a running flag to control the main loop
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                return
+                running = False
 
         # 繪製場景
         draw_roads(screen)
@@ -31,6 +31,17 @@ def main():
             vehicle.move(vehicles)  # 更新車輛位置
             vehicle.draw_car(screen)  # 繪製車輛
             vehicle.draw_end(screen)  # 繪製目標位置
+        
+        # Check for collision or all vehicles reaching their destination
+        if car_crash(vehicles):
+            with open("simulation_results.txt", "a") as file:
+                file.write(f"Collision detected\n")
+            running = False  # Exit the main loop
+
+        if every_vehicle_reached_end(vehicles):
+            with open("simulation_results.txt", "a") as file:
+                file.write(f"Successful\n")
+            running = False  # Exit the main loop
 
         pygame.display.flip()
         clock.tick(30)  # 控制幀率
