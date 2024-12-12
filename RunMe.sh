@@ -1,16 +1,16 @@
 #!/bin/zsh
 
 # Activate the Python environment if needed
-#source /path/to/your/env/bin/activate  # Adjust this path to your Python environment
+source /path/to/your/env/bin/activate  # Adjust this path to your Python environment
 
 # Loop to run the simulation 100 times
-#for i in {1..100}
-#do
-#  echo "Running simulation $i..."
-#  python main.py $i
-#done
+for i in {1..100}
+do
+  echo "Running simulation $i..."
+  python main.py $i --no-draw
+done
 
-# echo "All simulations completed!"
+echo "All simulations completed!"
 
 # Analyze simulation_results.txt for success and collision rates
 simulation_results_file="simulation_results.txt"
