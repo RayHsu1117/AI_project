@@ -437,7 +437,7 @@ class Vehicle:
         # 若不在任何道路或路口
         return 'Not on any road or intersection'
 
-    def draw(self, screen):
+    def draw_car(self, screen):
         """繪製車輛"""
         color = CAR_REACHED_COLOR if self.reached_destination else CAR_COLOR
         pygame.draw.rect(screen, color, (self.x, self.y, VEHICLE_SIZE, VEHICLE_SIZE))
