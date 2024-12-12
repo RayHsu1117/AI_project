@@ -1,6 +1,6 @@
 # vehicle.py
-from collections import deque
 import pygame
+import math
 from map import roads
 from map import road_couples
 from map import intersections
@@ -12,14 +12,17 @@ CAR_REACHED_COLOR = (255, 165, 0)  # 橘色
 # 車輛編號計數器
 vehicle_counter = 1
 # 每次移動的步長
-step = 2
+step = 2 # 當調整至5及以上時會出問題
 # 迴轉與左轉的移動幅度
 TURN_SHIFT = 25
+# 安全距離
+SAFTY_DISTANCE = math.floor(2.5*VEHICLE_SIZE)
+# 與終點坐標的誤差
+ERROR_DISTANCE = 5
 
 class Vehicle:
     def __init__(self, start, destination,start_road,destination_road, vehicle_id):
         self.x, self.y = start
-        self.path = deque(self.calculate_path(start, destination))  # 計算路徑
         self.start = start
         self.destination = destination
         self.reached_destination = False  # 車輛是否到達終點
@@ -28,73 +31,102 @@ class Vehicle:
         self.vehicle_id = vehicle_id  # 使用傳入的車號
 
         self.previous_place = start_road
-        self.current_place = self.previous_place
+        self.current_place = start_road
         self.current_direction = roads[self.current_place].direction # 初始位置一定是在道路上
         self.most_front = 0 # 用於正在進入十字路口時的前進距離上限
-        self.meet_x = False
-        self.meet_y = False
 
-        self.has_action = False
+        self.has_action = True
         self.action = None
         self.most_front_turn = 0 # 用於在十字路口路中央時的前進距離上限 (用於左轉)
         self.most_left_turn = 0 # 用於在十字路口路中央時的左進距離上限 (用於迴轉)
 
-    # 沒用到
-    def calculate_path(self, start, destination):
-        """計算車輛移動的路徑"""
-        sx, sy = start
-        dx, dy = destination
-        path = []
-        # 簡單直線移動邏輯 (分別處理 x 和 y)
-        if sx != dx:
-            for x in range(sx, dx, step if dx > sx else -step):
-                path.append((x, sy))
-        if sy != dy:
-            for y in range(sy, dy, step if dy > sy else -step):
-                path.append((dx, y))
+        self.stop = True
+        self.just_inter_intersection = False # 是否位於十字路口前(以及要進去與已進去)
+        self.inter_intersection = False
+
+    def need_stop_direct(self, vehicles): # 考慮在道路直行時是否需停(是否在小於安全距離的情況下在開在別臺車後面)
+        for vehicle in vehicles:
+            if (self.current_place == vehicle.current_place or (not vehicle.is_on_road(vehicle.x, vehicle.y) and self.current_place == vehicle.previous_place)) and self.vehicle_id != vehicle.vehicle_id and not vehicle.reached_destination:
+                if ((self.current_direction == 'UP' and abs(self.y-vehicle.y) < SAFTY_DISTANCE and self.y > vehicle.y) or 
+                    (self.current_direction == 'DOWN' and abs(self.y-vehicle.y) < SAFTY_DISTANCE and self.y < vehicle.y) or
+                    (self.current_direction == 'LEFT' and abs(self.x-vehicle.x) < SAFTY_DISTANCE and self.x > vehicle.x) or
+                    (self.current_direction == 'RIGHT' and abs(self.x-vehicle.x) < SAFTY_DISTANCE and self.x < vehicle.x)):
+                    self.stop = True
+                    return True
+        self.stop = False
+        return False
+
+    def need_stop_before_intersection(self, vehicles):
+        for vehicle in vehicles:
+            if self.vehicle_id != vehicle.vehicle_id and self.current_place == vehicle.current_place and not vehicle.reached_destination:
+                #print(str(self.vehicle_id)+" and "+str(vehicle.vehicle_id))
+                if vehicle.inter_intersection == True and not vehicle.stop:
+                    return True
+        return False
     
-        # 確保包含最終目標點
-        path.append(destination)
-        return path
+    def adjust_location(self): # 調整使車在路中央
+        if self.current_direction == 'UP':
+            self.x = roads[self.current_place].x1+3
+        elif self.current_direction == 'DOWN':
+            self.x = roads[self.current_place].x1+2
+        elif self.current_direction == 'LEFT':
+            self.y = roads[self.current_place].y1+2
+        elif self.current_direction == 'RIGHT':
+            self.y = roads[self.current_place].y1+3
 
     def move(self, vehicles):
-        #"""讓車輛沿路徑移動"""
-        #if not self.reached_destination and self.path:
-        #    self.x, self.y = self.path.popleft()
-        #    #print(self.find_place(self.x, self.y))
-        #if not self.path:  # 如果路徑空了，標記為到達終點
-        #    self.reached_destination = True
-
         #print(self.find_place(self.x, self.y))
         #print(self.has_action)
         if not self.reached_destination:
             dx, dy = self.destination
             delta_x = dx-self.x
             delta_y = dy-self.y
-            if self.is_on_road() is True:
+
+            if self.is_on_road(self.x, self.y):
                 # 已完成轉彎動作因此將相關flags設為false，並根據所在道路方向記錄行車方向
                 if self.has_action:
                     self.is_middle = False
                     self.has_action = False
+                    self.just_inter_intersection = False
+                    self.inter_intersection = False
                     self.current_place = self.find_place(self.x, self.y)
                     self.current_direction = roads[self.current_place].direction
+                    self.adjust_location()
+                    if self.current_direction == 'UP':
+                        self.most_front = roads[self.current_place].y1-VEHICLE_SIZE-2
+                    elif self.current_direction == 'DOWN':
+                        self.most_front = roads[self.current_place].y2+2
+                    elif self.current_direction == 'LEFT':
+                        self.most_front = roads[self.current_place].x1-VEHICLE_SIZE-2
+                    else:
+                        self.most_front = roads[self.current_place].x2+2
 
                 # 在路上的車只能一直走到路口前方
-                if self.current_direction == 'UP':
-                    self.most_front = self.y-VEHICLE_SIZE
+                if self.need_stop_direct(vehicles):
+                    pass
+                elif self.current_direction == 'UP':
                     self.y -= step
                 elif self.current_direction == 'DOWN':
-                    self.most_front = self.y+VEHICLE_SIZE
                     self.y += step
                 elif self.current_direction == 'LEFT':
-                    self.most_front = self.x-VEHICLE_SIZE
                     self.x -= step
                 else:
-                    self.most_front = self.x+VEHICLE_SIZE
                     self.x += step
             else:
                 # 先走到路口中央
-                if not self.has_action:
+                if self.just_inter_intersection == False:
+                    self.just_inter_intersection = True
+                    self.stop = True
+                    self.previous_place = self.current_place
+                    self.current_place = self.find_place(self.x, self.y)
+                if self.just_inter_intersection == True and self.stop == True:
+                    if self.need_stop_before_intersection(vehicles):
+                        self.stop = True
+                    else:
+                        self.stop = False
+                elif not self.has_action:
+                    if self.inter_intersection == False:
+                        self.inter_intersection = True
                     if self.current_direction == 'UP' and self.y > self.most_front:
                         self.y -= step
                     elif self.current_direction == 'DOWN' and self.y < self.most_front:
@@ -107,26 +139,25 @@ class Vehicle:
                         self.action = self.greedy_agent() # 策略
                         self.has_action = True
                         if self.current_direction == 'UP':
-                            self.most_front_turn = self.y-TURN_SHIFT
-                            self.most_left_turn = self.x-TURN_SHIFT
+                            self.most_front_turn = intersections[self.current_place].y1+2
+                            self.most_left_turn = intersections[self.current_place].x1+2
                         elif self.current_direction == 'DOWN':
-                            self.most_front_turn = self.y+TURN_SHIFT
-                            self.most_left_turn = self.x+TURN_SHIFT
+                            self.most_front_turn = intersections[self.current_place].y2-VEHICLE_SIZE-2
+                            self.most_left_turn = intersections[self.current_place].x2-VEHICLE_SIZE-2
                         elif self.current_direction == 'LEFT':
-                            self.most_front_turn = self.x-TURN_SHIFT
-                            self.most_left_turn = self.y+TURN_SHIFT
+                            self.most_front_turn = intersections[self.current_place].x1+2
+                            self.most_left_turn = intersections[self.current_place].y2-VEHICLE_SIZE-2
                         elif self.current_direction == 'RIGHT':
-                            self.most_front_turn = self.x+TURN_SHIFT
-                            self.most_left_turn = self.y-TURN_SHIFT
+                            self.most_front_turn = intersections[self.current_place].x2-VEHICLE_SIZE-2
+                            self.most_left_turn = intersections[self.current_place].y1+2
                 # 到了路口中央馬上執行行動 (行動後總是會走到另外一條道路上，到時候self.has_action會變回false)
                 # 在此之前可先決定策略，並存進self.action中，之後直接套用self.do_action(self.action)
                 else:
                     self.do_action(self.action) # 'AHEAD': 直行; 'BACK': 迴轉; 'LEFT': 左轉; 'RIGHT': 右轉
                 
-            if abs(delta_x) < step*3 and abs(delta_y) < step*3: # 容錯誤差
+            if abs(delta_x) < ERROR_DISTANCE and abs(delta_y) < ERROR_DISTANCE: # 容錯誤差
                 self.reached_destination = True
                 print("Vehicle "+str(self.vehicle_id)+" arrives.")
-
 
     def do_action(self, direction):
         # 這裡的direction是指對車子而言的欲轉彎方向，而self.current_direction為旁觀者所看的車頭朝向方向
@@ -143,60 +174,82 @@ class Vehicle:
             if self.current_direction == 'UP':
                 if self.x > self.most_left_turn:
                     self.x -= step
+                elif self.x < intersections[self.current_place].x1+2:
+                    self.x = intersections[self.current_place].x1+2
                 else:
                     self.y += step
             elif self.current_direction == 'DOWN':
                 if self.x < self.most_left_turn:
                     self.x += step
+                elif self.x > intersections[self.current_place].x2-VEHICLE_SIZE-2:
+                    self.x = intersections[self.current_place].x2-VEHICLE_SIZE-2
                 else:
                     self.y -= step
             elif self.current_direction == 'LEFT':
                 if self.y < self.most_left_turn:
                     self.y += step
+                elif self.y > intersections[self.current_place].y2-VEHICLE_SIZE-2:
+                    self.y = intersections[self.current_place].y2-VEHICLE_SIZE-2
                 else:
                     self.x += step
             elif self.current_direction == 'RIGHT':
                 if self.y > self.most_left_turn:
                     self.y -= step
+                elif self.y < intersections[self.current_place].y1+2:
+                    self.y = intersections[self.current_place].y1+2
                 else:
                     self.x -= step
         elif direction == 'LEFT': # 左轉
             if self.current_direction == 'UP':
                 if self.y > self.most_front_turn:
                     self.y -= step
+                elif self.y < intersections[self.current_place].y1+2:
+                    self.y = intersections[self.current_place].y1+2
                 else:
                     self.x -= step
             elif self.current_direction == 'DOWN':
                 if self.y < self.most_front_turn:
                     self.y += step
+                elif self.y > intersections[self.current_place].y2-VEHICLE_SIZE-2:
+                    self.y = intersections[self.current_place].y2-VEHICLE_SIZE-2
                 else:
                     self.x += step
             elif self.current_direction == 'LEFT':
                 if self.x > self.most_front_turn:
                     self.x -= step
+                elif self.x < intersections[self.current_place].x1+2:
+                    self.x = intersections[self.current_place].x1+2
                 else:
                     self.y += step
             elif self.current_direction == 'RIGHT':
                 if self.x < self.most_front_turn:
                     self.x += step
+                elif self.x > intersections[self.current_place].x2-VEHICLE_SIZE-2:
+                    self.x = intersections[self.current_place].x2-VEHICLE_SIZE-2
                 else:
                     self.y -= step
-        elif direction == direction == 'RIGHT': # 右轉
+        elif direction == 'RIGHT': # 右轉
             if self.current_direction == 'UP':
+                if self.y < intersections[self.current_place].y2-VEHICLE_SIZE-2:
+                    self.y = intersections[self.current_place].y2-VEHICLE_SIZE-2
                 self.x += step
             elif self.current_direction == 'DOWN':
+                if self.y > intersections[self.current_place].y1+2:
+                    self.y = intersections[self.current_place].y1+2
                 self.x -= step
             elif self.current_direction == 'LEFT':
                 self.y -= step
+                if self.x < intersections[self.current_place].x2-VEHICLE_SIZE-2:
+                    self.x = intersections[self.current_place].x2-VEHICLE_SIZE-2
             elif self.current_direction == 'RIGHT':
                 self.y += step
+                if self.x > intersections[self.current_place].x1+2:
+                    self.x = intersections[self.current_place].x1+2
         else:
             print("Wrong.")
             
     def greedy_agent(self): # 這個策略似乎非常喜歡迴轉
         dx, dy = self.destination
-        
-        # 先左右後上下
         action = self.is_near(self.destination_road)
         if action is None:
             delta_block_x = self.cut_corners_block_counter(self.x, dx)
@@ -322,25 +375,24 @@ class Vehicle:
         elif number < 555:
             return 3
         else:
-            return 3.5
-            
+            return 3.5  
 
-    def is_on_road(self):
-        if (((self.x >= 45 and self.x+VEHICLE_SIZE <= 200) or
-           (self.x >= 245 and self.x+VEHICLE_SIZE <= 355) or
-           (self.x >= 400 and self.x+VEHICLE_SIZE <= 555)) and
-           ((self.y >= 0 and self.y+VEHICLE_SIZE <= 45) or
-            (self.y >= 200 and self.y+VEHICLE_SIZE <= 245) or
-            (self.y >= 355 and self.y+VEHICLE_SIZE <= 400) or
-            (self.y >= 555 and self.y+VEHICLE_SIZE <= 600))):
+    def is_on_road(self, x, y):
+        if (((x >= 45 and x+VEHICLE_SIZE <= 200) or
+           (x >= 245 and x+VEHICLE_SIZE <= 355) or
+           (x >= 400 and x+VEHICLE_SIZE <= 555)) and
+           ((y >= 0 and y+VEHICLE_SIZE <= 45) or
+            (y >= 200 and y+VEHICLE_SIZE <= 245) or
+            (y >= 355 and y+VEHICLE_SIZE <= 400) or
+            (y >= 555 and y+VEHICLE_SIZE <= 600))):
             return True
-        if (((self.y >= 45 and self.y+VEHICLE_SIZE <= 200) or
-            (self.y >= 245 and self.y+VEHICLE_SIZE <= 355) or
-            (self.y >= 400 and self.y+VEHICLE_SIZE <= 555)) and
-            ((self.x >= 0 and self.x+VEHICLE_SIZE <= 45) or
-            (self.x >= 200 and self.x+VEHICLE_SIZE <= 245) or
-            (self.x >= 355 and self.x+VEHICLE_SIZE <= 400) or
-            (self.x >= 555 and self.x+VEHICLE_SIZE <= 600))):
+        if (((y >= 45 and y+VEHICLE_SIZE <= 200) or
+            (y >= 245 and y+VEHICLE_SIZE <= 355) or
+            (y >= 400 and y+VEHICLE_SIZE <= 555)) and
+            ((x >= 0 and x+VEHICLE_SIZE <= 45) or
+            (x >= 200 and x+VEHICLE_SIZE <= 245) or
+            (x >= 355 and x+VEHICLE_SIZE <= 400) or
+            (x >= 555 and x+VEHICLE_SIZE <= 600))):
             return True
         return False
         
@@ -355,7 +407,6 @@ class Vehicle:
         :param intersections: 路口字典
         :return: 位於的道路或路口名稱
         """
-
         # 計算車輛的範圍 (bounding box)
         vehicle_box = (
             x,
