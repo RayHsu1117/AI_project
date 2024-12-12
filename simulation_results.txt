@@ -1,5 +1,2 @@
-Collision detected
-Collision detected
-Collision detected
-Successful
-Successful
+1: Successful
+2: Successful
