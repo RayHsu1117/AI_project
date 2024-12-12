@@ -1,0 +1,9 @@
+Simulation 2: No vehicles reached destination.
+Simulation 2:
+  Average Time: 289.10 frames
+  Max Time: 496 frames
+  Min Time: 105 frames
+Simulation 100:
+  Average Time: 363.60 frames
+  Max Time: 741 frames
+  Min Time: 142 frames

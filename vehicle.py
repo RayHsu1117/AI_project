@@ -21,7 +21,7 @@ SAFTY_DISTANCE = math.floor(2.5*VEHICLE_SIZE)
 ERROR_DISTANCE = 5
 
 class Vehicle:
-    def __init__(self, start, destination,start_road,destination_road, vehicle_id):
+    def __init__(self, start, destination,start_road,destination_road, vehicle_id, start_time = 1):
         self.x, self.y = start
         self.start = start
         self.destination = destination
@@ -29,6 +29,9 @@ class Vehicle:
         self.start_road = start_road # 起點所在路名
         self.destination_road = destination_road # 終點所在路名
         self.vehicle_id = vehicle_id  # 使用傳入的車號
+
+        self.start_time = start_time  # Record when the vehicle was generated
+        self.time_to_reach = None  # Record when the vehicle reaches its destination
 
         self.previous_place = start_road
         self.current_place = start_road
@@ -74,7 +77,7 @@ class Vehicle:
         elif self.current_direction == 'RIGHT':
             self.y = roads[self.current_place].y1+3
 
-    def move(self, vehicles):
+    def move(self, vehicles, total_frames):
         #print(self.find_place(self.x, self.y))
         #print(self.has_action)
         if self.reached_destination:
@@ -159,6 +162,7 @@ class Vehicle:
             
         if abs(delta_x) < ERROR_DISTANCE and abs(delta_y) < ERROR_DISTANCE: # 容錯誤差
             self.reached_destination = True
+            self.time_to_reach = total_frames
             print("Vehicle "+str(self.vehicle_id)+" arrives.")
 
     def do_action(self, direction):
