@@ -10,7 +10,6 @@ parser = argparse.ArgumentParser(description="Simulate traffic with vehicles.")
 parser.add_argument("simulation_id", type=int, help="Simulation ID for logging results")
 parser.add_argument("--no-draw", action="store_true", help="Disable drawing for faster simulation")
 args = parser.parse_args()
-
 # Configure global drawing flag
 globals.enable_drawing = not args.no_draw
 
@@ -66,17 +65,6 @@ def main(simulation_id):
     # Analyze and log simulation time
     if not crash:
         analyze_simulation_time(vehicles, simulation_id, total_frames)
-
-def ending_simulation(crash, reached):
-    if crash:
-        with open("simulation_results.txt", "a") as file:
-            file.write(f"Collision detected\n")
-        pygame.quit()
-    
-    if reached:
-        with open("simulation_results.txt", "a") as file:
-            file.write(f"Successful\n")
-        pygame.quit()
 
 def analyze_simulation_time(vehicles, simulation_id, total_frames):
     """Analyze vehicle simulation time and record results"""

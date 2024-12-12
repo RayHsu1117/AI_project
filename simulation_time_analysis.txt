@@ -1,8 +1,0 @@
-Simulation 1:
-  Average Time: 133.80 frames
-  Max Time: 207 frames
-  Min Time: 43 frames
-Simulation 2:
-  Average Time: 181.00 frames
-  Max Time: 335 frames
-  Min Time: 34 frames
