@@ -492,3 +492,29 @@ def generate_random():
     else:    
         point = (roads[road].x1+3,random.randint(roads[road].y1,roads[road].y2-VEHICLE_SIZE))
     return point,road
+
+def car_crash(vehicles):
+    """檢查車輛是否有相撞並記錄結果"""
+    for i in range(len(vehicles)):
+        # 已到達終點的不用計算
+        if(vehicles[i].reached_destination):
+            continue
+        for j in range(i + 1, len(vehicles)):
+            # 已到達終點的不用計算
+            if(vehicles[j].reached_destination):
+                continue
+
+            # 獲取車輛位置範圍
+            x1, y1 = vehicles[i].x, vehicles[i].y
+            x2, y2 = vehicles[j].x, vehicles[j].y
+            
+            # 碰撞條件：兩車的 x, y 範圍重疊
+            if (abs(x1 - x2) < VEHICLE_SIZE) and (abs(y1 - y2) < VEHICLE_SIZE):
+                return True
+    return False
+
+def every_vehicle_reached_end(vehicles):
+    for vehicle in vehicles:
+        if not vehicle.reached_destination:
+            return False
+    return True

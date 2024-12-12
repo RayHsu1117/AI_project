@@ -2,7 +2,7 @@
 import pygame
 from draw import draw_roads
 # from roads import roads
-from vehicle import generate_vehicle
+from vehicle import generate_vehicle, car_crash, every_vehicle_reached_end
 import random
 
 # 初始化 Pygame
@@ -12,7 +12,7 @@ screen = pygame.display.set_mode((602, 602))
 # 初始化車輛
 
 vehicles = []
-for i in range(10):
+for i in range(30):
     vehicle = generate_vehicle()
     vehicles.append(vehicle)
 # 主程式
@@ -34,6 +34,17 @@ def main():
 
         pygame.display.flip()
         clock.tick(30)  # 控制幀率
+
+def ending_simulation(crash, reached):
+    if crash:
+        with open("simulation_results.txt", "a") as file:
+            file.write(f"Collision detected\n")
+        pygame.quit()
+    
+    if reached:
+        with open("simulation_results.txt", "a") as file:
+            file.write(f"Successful\n")
+        pygame.quit()
 
 if __name__ == "__main__":
     main()
